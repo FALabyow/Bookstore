@@ -1,4 +1,6 @@
-﻿using Bookstore.Application.Interfaces;
+﻿using Bookstore.Application.DTOs;
+using Bookstore.Application.Interfaces;
+using Bookstore.Application.Services;
 using Bookstore.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,15 +10,51 @@ namespace Bookstore.API.Controllers
     [ApiController]
     public class BooksController : ControllerBase
     {
-        private readonly IBookRepository _repository;
+        private readonly BookService _bookService;
 
-        public BooksController(IBookRepository repository) => _repository = repository;
+        public BooksController(BookService bookService)
+        {
+            _bookService = bookService;
+        }
 
-        [HttpGet] public async Task<IActionResult> GetAll() => Ok(await _repository.GetAllAsync());
-        [HttpGet("{id}")] public async Task<IActionResult> Get(int id) => Ok(await _repository.GetByIdAsync(id));
-        [HttpPost] public async Task<IActionResult> Add([FromBody] Book book) { await _repository.AddAsync(book); return Ok(); }
-        [HttpPut] public async Task<IActionResult> Update([FromBody] Book book) { await _repository.UpdateAsync(book); return Ok(); }
-        [HttpDelete("{id}")] public async Task<IActionResult> Delete(int id) { await _repository.DeleteAsync(id); return Ok(); }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetAllBooks()
+        {
+            var books = await _bookService.GetAllBooksAsync();
+            return Ok(books);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<BookDto>> GetBookById(int id)
+        {
+            var book = await _bookService.GetBookByIdAsync(id);
+            if (book == null) return NotFound();
+
+            return Ok(book);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddBook([FromBody] BookDto bookDto)
+        {
+            await _bookService.AddBookAsync(bookDto);
+            return CreatedAtAction(nameof(GetBookById), new { id = bookDto.Id }, bookDto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDto bookDto)
+        {
+            if (id != bookDto.Id) return BadRequest();
+
+            await _bookService.UpdateBookAsync(bookDto);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBook(int id)
+        {
+            await _bookService.DeleteBookAsync(id);
+            return NoContent();
+        }
     }
 }
 

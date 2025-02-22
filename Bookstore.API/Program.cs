@@ -1,5 +1,6 @@
 
 using Bookstore.Application.Interfaces;
+using Bookstore.Application.Services;
 using Bookstore.Infrastructure.Persistence;
 using Bookstore.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,7 @@ namespace Bookstore.API
             builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContextConnection")));
             builder.Services.AddScoped<IBookRepository, BookRepository>();
+            builder.Services.AddScoped<BookService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
