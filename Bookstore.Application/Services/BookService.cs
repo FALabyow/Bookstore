@@ -23,7 +23,6 @@ namespace Bookstore.Application.Services
             var books = await _bookRepository.GetAllAsync();
             return books.Select(b => new BookDto
             {
-                Id = b.Id,
                 Title = b.Title,
                 Author = b.Author,
                 Price = b.Price
